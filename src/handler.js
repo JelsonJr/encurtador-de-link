@@ -25,7 +25,7 @@ async function shortenLink(event) {
 
     if (existingLink) {
       return sendResponse({
-        shortUrl: `${process.env.BASE_URL}/${existing.shortCode}`,
+        shortUrl: `${process.env.BASE_URL}/${existingLink.shortCode}`,
         message: "Link already exists",
       });
     }
