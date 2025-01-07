@@ -1,0 +1,45 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: jelsonrodrigues
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: encurtador-de-link
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: encurtador-de-link
+
+params:
+  default:
+    dbName: encurtador-de-link
+  dev:
+    connectionString: mongodb://localhost:27017/${self:params.default.dbName}
+    url: http://localhost:3000
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    NODE_OPTIONS: --enable-source-maps
+    BASE_URL: ${param:url}
+    DATABASE_NAME: ${param:dbName}
+    MONGO_URI: ${param:connectionString}
+
+functions:
+  shorten-link:
+    handler: src/handler.shortenLink
+    events:
+      - httpApi:
+          path: /
+          method: post
+          request:
+            schemas:
+              application/json: ${file(./src/model/shortenLink.json)}
+
+  redirect:
+    handler: src/handler.redirect
+    events:
+      - httpApi:
+          path: /{shortCode}
+          method: get
+
+plugins:
+  - serverless-offline
